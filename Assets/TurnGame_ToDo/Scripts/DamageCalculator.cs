@@ -1,6 +1,6 @@
-using UnityEngine;
 using TurnGame;
 using UnityEditor.PackageManager.Requests;
+using UnityEngine;
 namespace TurnGame.Student
 {
     public class DamageCalculator : IDamageCalculator
@@ -19,15 +19,25 @@ namespace TurnGame.Student
             baseDamage = Mathf.Max(1f, baseDamage);
 
             float elementMultiplier = 1f;
-            if (request.SkillElement != BattleElement.None && request.SkillElement == request.Resistance)
+            if (request.SkillElement != BattleElement.None && request.SkillElement == request.Resisrance)
                 elementMultiplier = 1.5f;
             else if (request.SkillElement != BattleElement.None && request.SkillElement == request.Resistance)
                 elementMultiplier = 0.5f;
 
+            bool isCritical = request.RandomValue < 0.1f;
+            float criticalMultiplier = isCritical ? 1.5f : 1f;
+            float guradMultiplier = request.Guarding ? 0.5f : 1f;
+            float finalDamage = baseDamage * elementMultiplier;
+            finalDamage *= criticalMultiplier;
+            finalDamage *= guradMultiplier;
+            int damage = Mathf.Max(1, Mathf.RoundToInt(finalDamage));
 
-            //float element = r.SkillElement != BattleElement.None && r.SkillElement == r.Weakness ? 1.5f : r.SkillElement != BattleElement.None && r.SkillElement == r.Resistance ? 0.5f : 1f;
-            //int damage = Mathf.Max(1, Mathf.RoundToInt((r.Attack - r.Defense * 0.5f) * element));
-            //return new DamageResult { Damage = damage, IsCritical = false, ElementMultiplier = element };
+            return new DamageResult
+            {
+                Damage = damage,
+                IsCritical = isCritical,
+                ElementMultiplier = elementMultiplier
+            };
         }
     }
 }
